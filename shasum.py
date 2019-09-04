@@ -20,6 +20,7 @@ class HashFile:
 	def get_args():
 		parser = argparse.ArgumentParser(description="hash a file or compare hash to file")
 		parser.add_argument("filename", help="file to be hashed")
+		parser.add_argument("-a", "--algorithm", type=int, help="choose SHA hashing algorithm: 1 (default), 256, 512")
 		parser.add_argument("-c", "--compare", help="provide a hash to compare")
 		return parser.parse_args()
 
@@ -39,16 +40,21 @@ class HashFile:
 			cprint(f"DIGEST DOES NOT MATCH\nold {old}\nnew {new}", 'red')
 
 
-	def write_hash_file(self, file):
+	def write_hash_file(self, file, algo):
 		"""write hash to a file with same name, sha extension"""
-		file_name = file.split('.')[0] + '.sha1'
+		file_name = file.split('.')[0] + f".sha{algo}"
 		with open(file_name, 'w') as f:
-			f.write(self.compute_hash(file))
+			f.write(self.compute_hash(file, algo))
 
 
-	def compute_hash(self, file):
+	def compute_hash(self, file, algo):
 		BUFF_SIZE = 65536
-		digest = hashlib.sha1()
+		if algo == 256:
+			digest = hashlib.sha256()
+		elif algo == 512:
+			digest = hashlib.sha512()
+		else:
+			digest = hashlib.sha1()
 
 		with open(file, 'rb') as f:
 			while True:
@@ -66,13 +72,14 @@ class HashFile:
 		args = self.get_args()
 		self.filename = args.filename
 
-		hash = self.compute_hash(self.filename)
+		algo = 1 if not args.algorithm else args.algorithm
+		hash = self.compute_hash(self.filename, algo)
 		
 		if args.compare:
 			old_hash = self.open_hash(args.compare)
 			self.compare_hash(old_hash, hash)
 		else:
-			self.write_hash_file(self.filename)
+			self.write_hash_file(self.filename, algo)
 			cprint(hash, 'blue')
 
 
