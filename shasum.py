@@ -15,11 +15,13 @@ class HashFile:
 	@staticmethod
 	def get_args():
 		parser = argparse.ArgumentParser(description="hash a file or compare hash to file")
-		parser.add_argument("filename", help="file to be hashed")
+		parser.add_argument("filename", help="file to be hashed, default is SHA1")
 		parser.add_argument("-a", "--algorithm", default="sha1",
-							choices=['sha1', 'sha256', 'sha512', 'sha3'],
-							help="choose hashing algorithm: sha1 (default), sha256, sha512, sha3 (256)")
-		parser.add_argument("-c", "--compare", help="provide a hash to compare")
+							choices=['sha1', 'sha256', 'sha512', 'sha3', 'blake2'],
+							help="choose hashing algorithm: sha1 (default), sha256, sha512, sha3(256), blake2()")
+		parser.add_argument("-c", "--compare", help="provide a hash or hashfile in hexadecimal format to compare")
+		parser.add_argument("-s", "--size", type=int, choices=[8,16,20,24,32,40,48,60,64],
+							help="size of output between 8 and 64 bytes, only used for blake2, default is 20 bytes, note that output to screen/file is in hexadecimal i.e. choosing blake2(x) results in 2x hex characters in file")
 		return parser.parse_args()
 
 
@@ -38,14 +40,14 @@ class HashFile:
 			cprint(f"DIGEST DOES NOT MATCH\nold {old}\nnew {new}", 'red')
 
 
-	def write_hash_file(self, file, algo):
-		"""write hash to a file with same name, sha extension"""
+	def write_hash_file(self, file, algo, size):
+		""" (over)write hash to a file with same name, sha extension """
 		file_name = file.split('.')[0] + '.' + algo
 		with open(file_name, 'w') as f:
-			f.write(self.compute_hash(file, algo))
+			f.write(self.compute_hash(file, algo, size))
 
 
-	def compute_hash(self, file, algo):
+	def compute_hash(self, file, algo, size):
 		BUFF_SIZE = 65536
 		if algo == 'sha256':
 			digest = hashlib.sha256()
@@ -53,6 +55,8 @@ class HashFile:
 			digest = hashlib.sha512()
 		elif algo == 'sha3':
 			digest = hashlib.sha3_256()
+		elif algo == 'blake2':
+			digest = hashlib.blake2b(digest_size=size)
 		else:
 			digest = hashlib.sha1()
 
@@ -72,13 +76,14 @@ class HashFile:
 		self.filename = args.filename
 
 		algo = 'sha1' if not args.algorithm else args.algorithm
-		hash = self.compute_hash(self.filename, algo)
+		size = 20 if not args.size else args.size
+		hash = self.compute_hash(self.filename, algo, size)
 		
 		if args.compare:
 			old_hash = self.open_hash(args.compare)
 			self.compare_hash(old_hash, hash)
 		else:
-			self.write_hash_file(self.filename, algo)
+			self.write_hash_file(self.filename, algo, size)
 			cprint(hash, 'blue')
 
 
