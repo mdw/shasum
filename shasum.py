@@ -43,11 +43,11 @@ class HashFile:
 			cprint(f"DIGEST DOES NOT MATCH\nold {old}\nnew {new}", 'red')
 
 
-	def write_hash_file(self, file, algo, size):
+	def write_hash_file(self, file, extension, size):
 		""" (over)write hash to a file with same name, sha extension """
-		file_name = file.split('.')[0] + '.' + algo
+		file_name = file.split('.')[0] + '.' + extension
 		with open(file_name, 'w') as f:
-			f.write(self.compute_hash(file, algo, size))
+			f.write(self.compute_hash(file, extension, size))
 
 
 	def compute_hash(self, file, algo, size):
