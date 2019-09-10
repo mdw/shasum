@@ -51,7 +51,7 @@ optional arguments:
 - $ ./shasum -a blake2 -s 40 file.txt -c checksumfile
 
 #### find size of hash stored in checksumfile and compare to hash of file.txt
-#### not checksumfile contains hex chars, 2 hex chars for each byte
+note checksumfile contains hex chars, 2 hex chars for each byte
 - $ wc -c checksumfile
 - 128 checksumfile
 - $ ./shasum.py -a blake2 -s 64 file.txt -c checksumfile
