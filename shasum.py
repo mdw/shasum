@@ -21,7 +21,10 @@ class HashFile:
 							help="choose hashing algorithm: sha1 (default), sha256, sha512, sha3(256), blake2()")
 		parser.add_argument("-c", "--compare", help="provide a hash or hashfile in hexadecimal format to compare")
 		parser.add_argument("-s", "--size", type=int, choices=[8,16,20,24,32,40,48,60,64],
-							help="size of output between 8 and 64 bytes, only used for blake2, default is 20 bytes, note that output to screen/file is in hexadecimal i.e. choosing blake2(x) results in 2x hex characters in file")
+							help="""size of output between 8 and 64 bytes used for blake2 (default is 20 bytes), 
+								use either 32 or 64 bytes with SHA3 
+								note that output to screen/file is hexadecimal 
+								i.e. blake2(x) results in 2x hex characters in file""")
 		return parser.parse_args()
 
 
@@ -49,12 +52,14 @@ class HashFile:
 
 	def compute_hash(self, file, algo, size):
 		BUFF_SIZE = 65536
+
 		if algo == 'sha256':
 			digest = hashlib.sha256()
 		elif algo == 'sha512':
 			digest = hashlib.sha512()
 		elif algo == 'sha3':
-			digest = hashlib.sha3_256()
+			# 32 bytes => sha3_256() otherwise go with 64 bytes => sha3_512()
+			digest = hashlib.sha3_256() if size == 32 else hashlib.sha3_512()
 		elif algo == 'blake2':
 			digest = hashlib.blake2b(digest_size=size)
 		else:

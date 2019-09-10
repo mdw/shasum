@@ -18,7 +18,8 @@ optional arguments:
   -c COMPARE, --compare COMPARE
                         provide a hash or file containing hash to compare
   -s SIZE, --size SIZE
-						choose output size in bytes, only used with blake2, default is 20 bytes
+						choose output size in bytes, 8, 16, 20, 24, 32, 40, 64 for blake2, default is 20 bytes,
+						choose 32 or 64 bytes for SHA3, default is 64 bytes
 
 
 ### examples:
@@ -35,7 +36,7 @@ optional arguments:
 
 #### compare SHA3 hash of file.txt to the checksum literal (or from file)
 - $ ./shasum -a sha3 file.txt -c 171609e28789aa5d3a30b02d14bae27509dc5228318123c7fec96cab83749dcd
-- $ ./shasum -a sha3 file.txt -c file.sha3
+- $ ./shasum -a sha3 -s 32 file.txt -c file.sha3
 
 #### create SHA256 hash of file.txt, save to file
 - $ ./shasum -a sha256 checksumfile
